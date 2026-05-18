@@ -3,7 +3,18 @@
 
 > A full-stack web application that applies Natural Language Processing and probabilistic classification to detect spam emails in real time via Gmail API integration.
 
----
+## Screenshots
+
+### Dashboard Interface
+
+![Dashboard](<img width="786" height="651" alt="Screenshot 2026-05-19 at 1 59 22 AM" src="https://github.com/user-attachments/assets/15249ce8-9e88-405f-864d-cf560d643d32" />
+)
+
+### Spam Detection Result
+
+![Spam Detection](<img width="773" height="657" alt="Screenshot 2026-05-19 at 1 59 31 AM" src="https://github.com/user-attachments/assets/64c1071c-2d7b-4cf3-a998-4c54a5464c04" />
+)
+
 
 ## Abstract
 

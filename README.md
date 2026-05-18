@@ -295,4 +295,4 @@ Quantitative evaluation metrics (accuracy, precision, recall, F1-score) should b
 
 ---
 
-## Developed By: 
+## Developed By: https://github.com/adrijatarafder, https://github.com/daniyaa1

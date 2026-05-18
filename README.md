@@ -295,6 +295,4 @@ Quantitative evaluation metrics (accuracy, precision, recall, F1-score) should b
 
 ---
 
-## License
-
-This project is developed for academic purposes. See `LICENSE` for details.
+## Developed By: 

@@ -8,8 +8,10 @@ from model import predict, get_model_metadata
 from preprocessor import extract_signals, build_reason_list
 
 load_dotenv()
-
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+FRONTEND_URL = os.getenv(
+    "FRONTEND_URL",
+    "https://ai-based-spam-mail-detection.vercel.app"
+)
 DEFAULT_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",

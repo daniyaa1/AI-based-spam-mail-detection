@@ -2,6 +2,10 @@
 
 A Machine Learning based spam email classification system built using Natural Language Processing (NLP) techniques and multiple classification algorithms to detect spam and non-spam messages with high accuracy.
 
+## Demo
+
+![Demo](demo.gif)
+
 ## Features
 
 - Spam and non-spam message classification

@@ -4,7 +4,7 @@ A Machine Learning based spam email classification system built using Natural La
 
 ## Demo
 
-![Demo](demo.gif)
+![Demo](screenshots/demo.gif)
 
 ## Features
 

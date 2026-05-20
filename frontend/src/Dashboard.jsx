@@ -1,27 +1,61 @@
-import { useState } from 'react'
-import axios from 'axios'
+import React, { useEffect, useState } from 'react'
+import { analyzeText, getModelInfo } from './api'
 
 export default function Dashboard() {
   const [subject, setSubject] = useState('')
   const [body, setBody] = useState('')
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [modelInfo, setModelInfo] = useState(null)
+
+  useEffect(() => {
+    let ignore = false
+
+    async function loadModelInfo() {
+      try {
+        const data = await getModelInfo()
+        if (!ignore) {
+          setModelInfo(data)
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    loadModelInfo()
+    return () => {
+      ignore = true
+    }
+  }, [])
+
+  const loadExample = () => {
+    setSubject('Urgent: verify your payroll account today')
+    setBody(
+      'Hello team member, your payroll profile has been suspended. Click the secure link below to verify your password and avoid delayed salary processing.'
+    )
+    setResult(null)
+    setError('')
+  }
+
+  const clearForm = () => {
+    setSubject('')
+    setBody('')
+    setResult(null)
+    setError('')
+  }
 
   const analyzeEmail = async () => {
     if (!subject || !body) return
 
     try {
       setLoading(true)
-
-      const response = await axios.post('http://127.0.0.1:8000/analyze', {
-        subject,
-        body,
-      })
-
-      setResult(response.data)
+      setError('')
+      const data = await analyzeText(subject, body)
+      setResult(data)
     } catch (err) {
       console.error(err)
-      alert('Analysis failed')
+      setError('Analysis failed. Make sure the backend server is running on port 8000.')
     } finally {
       setLoading(false)
     }
@@ -33,59 +67,97 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-grid">
-      <div className="glass-card input-card">
+      <section className="panel panel-input">
         <div className="card-header">
-          <h2>Email Scanner</h2>
-          <span className="status-live">LIVE</span>
+          <div>
+            <p className="section-kicker">Input</p>
+            <h2>Email content</h2>
+          </div>
+          <span className="status-live">Manual review</span>
         </div>
 
-        <label>Email Subject</label>
+        <label htmlFor="subject">Email subject</label>
         <input
+          id="subject"
           type="text"
-          placeholder="Enter suspicious email subject"
+          placeholder="Quarterly bonus update"
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
         />
 
-        <label>Email Body</label>
+        <label htmlFor="body">Email body</label>
         <textarea
+          id="body"
           rows="10"
-          placeholder="Paste email content here"
+          placeholder="Paste the email body here for review."
           value={body}
           onChange={(e) => setBody(e.target.value)}
         />
 
-        <button onClick={analyzeEmail} disabled={loading}>
-          {loading ? 'Analyzing Threat...' : 'Analyze Email'}
-        </button>
-      </div>
+        <div className="button-row">
+          <button className="primary-button" onClick={analyzeEmail} disabled={loading}>
+            {loading ? 'Reviewing message...' : 'Analyze message'}
+          </button>
+          <button className="secondary-button" onClick={loadExample} type="button">
+            Load example
+          </button>
+          <button className="tertiary-button" onClick={clearForm} type="button">
+            Clear
+          </button>
+        </div>
 
-      <div className="glass-card result-card">
+        {error ? <p className="error-text">{error}</p> : null}
+
+        {modelInfo?.dataset_name && typeof modelInfo?.best_accuracy === 'number' ? (
+          <div className="analysis-section">
+            <h3>Training setup</h3>
+            <div className="reason-chip neutral-chip">
+              Dataset: {modelInfo.dataset_name}
+            </div>
+            <div className="reason-chip neutral-chip">
+              Best model: {modelInfo.best_model} ({(modelInfo.best_accuracy * 100).toFixed(2)}% accuracy)
+            </div>
+          </div>
+        ) : null}
+      </section>
+
+      <section className="panel panel-result">
         <div className="card-header">
-          <h2>Threat Analysis</h2>
+          <div>
+            <p className="section-kicker">Output</p>
+            <h2>Analysis summary</h2>
+          </div>
         </div>
 
         {!result ? (
           <div className="empty-state">
-            <div className="scanner-circle"></div>
-            <p>No email analyzed yet.</p>
+            <div className="empty-state-mark">S</div>
+            <h3>Ready for a first pass</h3>
+            <p>
+              Run an analysis to see the spam probability, confidence level,
+              and the reasons behind the model's decision.
+            </p>
           </div>
         ) : (
           <>
-            <div className="threat-banner">
+            <div className="result-banner">
               <div>
                 <p className="mini-label">Classification</p>
-
-                <h1>
+                <h1 className="result-title">
                   {result.is_spam
-                    ? '⚠ Spam Detected'
-                    : '✔ Safe Email'}
+                    ? 'Likely spam'
+                    : 'Looks safe'}
                 </h1>
+                <p className="result-summary">
+                  {result.is_spam
+                    ? 'This message contains language patterns that closely match spam samples.'
+                    : 'The wording and structure look closer to a normal inbox message.'}
+                </p>
               </div>
 
-              <div className="risk-score">
+              <div className={`risk-score ${result.is_spam ? 'risk-high' : 'risk-low'}`}>
                 <span>{percentage}%</span>
-                <p>Threat Score</p>
+                <p>Spam score</p>
               </div>
             </div>
 
@@ -96,8 +168,29 @@ export default function Dashboard() {
               ></div>
             </div>
 
+            <div className="metrics-grid">
+              <div className="metric-card">
+                <p className="mini-label">Spam probability</p>
+                <p className="metric">
+                  {(result.spam_probability * 100).toFixed(2)}%
+                </p>
+              </div>
+              <div className="metric-card">
+                <p className="mini-label">Confidence</p>
+                <p className="metric">
+                  {(result.confidence * 100).toFixed(2)}%
+                </p>
+              </div>
+              <div className="metric-card">
+                <p className="mini-label">Model used</p>
+                <p className="metric metric-small">
+                  {result.model_name || 'Saved classifier'}
+                </p>
+              </div>
+            </div>
+
             <div className="analysis-section">
-              <h3>AI Reasoning</h3>
+              <h3>Why the model said that</h3>
 
               {result.reasons?.map((reason, index) => (
                 <div key={index} className="reason-chip">
@@ -105,23 +198,9 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
-
-            <div className="analysis-section">
-              <h3>Spam Probability</h3>
-              <p className="metric">
-                {(result.spam_probability * 100).toFixed(2)}%
-              </p>
-            </div>
-
-            <div className="analysis-section">
-              <h3>Confidence Level</h3>
-              <p className="metric">
-                {(result.confidence * 100).toFixed(2)}%
-              </p>
-            </div>
           </>
         )}
-      </div>
+      </section>
     </div>
   )
 }

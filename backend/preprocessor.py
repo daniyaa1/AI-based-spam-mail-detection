@@ -4,11 +4,25 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 
-nltk.download("stopwords", quiet=True)
-nltk.download("punkt", quiet=True)
-
 _stemmer = PorterStemmer()
-_stop_words = set(stopwords.words("english"))
+
+
+def _load_stop_words() -> set[str]:
+    try:
+        nltk.data.find("corpora/stopwords")
+    except LookupError:
+        try:
+            nltk.download("stopwords", quiet=True)
+        except Exception:
+            return set()
+
+    try:
+        return set(stopwords.words("english"))
+    except LookupError:
+        return set()
+
+
+_stop_words = _load_stop_words()
 
 # Spam signals used for rule-based explanations
 SPAM_SIGNALS = {

@@ -1,0 +1,32 @@
+{
+  "dataset_name": "SMS Spam Collection Dataset",
+  "dataset_url": "https://archive.ics.uci.edu/ml/machine-learning-databases/00228/smsspamcollection.zip",
+  "row_count": 5572,
+  "spam_count": 747,
+  "ham_count": 4825,
+  "best_model": "Support Vector Machine (SVM)",
+  "best_accuracy": 0.9883,
+  "model_results": [
+    {
+      "model": "Naive Bayes",
+      "accuracy": 0.983
+    },
+    {
+      "model": "Logistic Regression",
+      "accuracy": 0.9749
+    },
+    {
+      "model": "Support Vector Machine (SVM)",
+      "accuracy": 0.9883
+    }
+  ],
+  "vectorizer": {
+    "type": "TF-IDF",
+    "max_features": 8000,
+    "ngram_range": [
+      1,
+      2
+    ],
+    "min_df": 2
+  }
+}
